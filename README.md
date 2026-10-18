@@ -17,9 +17,9 @@ Check every payout, your RTP and your balance curve, straight from the browser.
 
 - Search **5,500+ games** from **1,500+ publishers**, with their cover art. Valkyrie and Colorful Play come first.
 - Pick the **math version** and the **mode** (base, ante, bonus...) and see each mode's RTP.
-- Verify up to **50,000 bets** per run. The range is split into requests the service accepts.
+- Verify up to **50,000 bets** per run, or up to **1,000,000** with **Find only max wins**, which keeps just the nonces that hit the max win of the selected mode (it is much more frequent in buy modes). The range is split into requests the service accepts.
 - Results: bets checked, **run RTP vs expected RTP**, hit rate, biggest win and total returned.
-- **Balance chart**: one point per nonce, hover a point to see its payout multiplier and running balance.
+- **Balance chart**: one point per nonce (one every 500 in the 1,000,000 mode), with gold stars on the max wins. Hover a point to see its payout multiplier and running balance, click it (or a star) to watch its replay. Drag over the chart to zoom into a range, or use the zoom buttons.
 - List of every winning bet, with **CSV export**.
 - **Replay dialog**: click a winning bet (or any point of the balance chart) to watch its official replay, even for a nonce that was never played. The event your seeds land on is found in the browser with the public fair service. Each game shows a badge: **Replays available** or **Replays not yet**. Replays only exist for the games whose game id is included in `src/lib/knownReplays.json` (partial coverage).
 - SHA-256 of your server seed, to compare with the hash Stake showed before you bet.

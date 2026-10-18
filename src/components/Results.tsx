@@ -1,10 +1,11 @@
 import { lazy, Suspense } from 'react'
-import { Download, Percent, Play, Receipt, Target, Trophy } from 'lucide-react'
+import { Crown, Download, Percent, Play, Receipt, Target, Trophy } from 'lucide-react'
 import StatCard from '@/components/StatCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { SAMPLE_STEP } from '@/lib/api'
 import { downloadCsv, fmt } from '@/lib/format'
 import type { RunResult } from '@/lib/types'
 
@@ -19,7 +20,7 @@ interface Props {
 }
 
 export default function Results({ result, filename, onReplay }: Props) {
-  const { bets, wins, best, runRtp, expectedRtp, totalReturned, cost } = result
+  const { bets, wins, best, runRtp, expectedRtp, totalReturned, cost, onlyMax, maxPayout } = result
   const hasExpected = Number.isFinite(expectedRtp)
   const delta = hasExpected ? (runRtp - expectedRtp) * 100 : 0
 
@@ -34,24 +35,44 @@ export default function Results({ result, filename, onReplay }: Props) {
           hint={hasExpected ? `${fmt(expectedRtp * 100)}% expected (${delta >= 0 ? '+' : ''}${fmt(delta)} pts)` : undefined}
           accent={hasExpected && delta >= 0}
         />
-        <StatCard icon={Target} label="Winning bets" value={fmt(wins.length, 0)} hint={`${fmt((wins.length / bets) * 100)}% hit rate`} />
-        <StatCard
-          icon={Trophy}
-          label="Biggest win"
-          value={best.value ? `${fmt(best.value)}x` : 'None'}
-          hint={best.value ? `Nonce ${best.nonce} · ${fmt(totalReturned)}x returned` : `${fmt(totalReturned)}x returned`}
-        />
+        {onlyMax ? (
+          <>
+            <StatCard
+              icon={Crown}
+              label="Max wins found"
+              value={fmt(wins.length, 0)}
+              hint={wins.length > 0 ? `1 in ${fmt(bets / wins.length, 0)} bets` : 'None in this range'}
+              accent={wins.length > 0}
+            />
+            <StatCard icon={Trophy} label="Max win of the mode" value={`${fmt(maxPayout)}x`} hint={`${fmt(totalReturned)}x returned in the range`} />
+          </>
+        ) : (
+          <>
+            <StatCard icon={Target} label="Winning bets" value={fmt(wins.length, 0)} hint={`${fmt((wins.length / bets) * 100)}% hit rate`} />
+            <StatCard
+              icon={Trophy}
+              label="Biggest win"
+              value={best.value ? `${fmt(best.value)}x` : 'None'}
+              hint={best.value ? `Nonce ${best.nonce} · ${fmt(totalReturned)}x returned` : `${fmt(totalReturned)}x returned`}
+            />
+          </>
+        )}
       </div>
 
       <Suspense fallback={<Skeleton className="h-96 rounded-xl" />}>
-        <ProfitChart series={result.series} onPickNonce={onReplay} />
+        <ProfitChart
+          series={result.series}
+          markers={result.markers}
+          sampledEvery={onlyMax ? SAMPLE_STEP : 1}
+          onPickNonce={onReplay}
+        />
       </Suspense>
 
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-          <CardTitle>Winning bets</CardTitle>
+          <CardTitle>{onlyMax ? 'Max wins' : 'Winning bets'}</CardTitle>
           <div className="flex gap-2">
-            {onReplay && best.value > 0 && (
+            {onReplay && !onlyMax && best.value > 0 && (
               <Button variant="secondary" size="sm" onClick={() => onReplay(best.nonce)}>
                 <Play className="size-4" />
                 Replay biggest win
@@ -65,7 +86,9 @@ export default function Results({ result, filename, onReplay }: Props) {
         </CardHeader>
         <CardContent>
           {wins.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No winning bets in this range.</p>
+            <p className="text-sm text-muted-foreground">
+              {onlyMax ? 'No max win in this range. Try a larger range or another mode.' : 'No winning bets in this range.'}
+            </p>
           ) : (
             <div className="max-h-96 overflow-y-auto rounded-md border">
               <Table>

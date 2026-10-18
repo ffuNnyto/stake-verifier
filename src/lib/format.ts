@@ -1,5 +1,8 @@
 import type { Payout } from './types'
 
+export const fmtCompact = (value: number) =>
+  value.toLocaleString('en', { notation: 'compact', maximumFractionDigits: 1 })
+
 export const fmt = (value: number, digits = 2) => value.toLocaleString('en', { maximumFractionDigits: digits })
 
 export function downloadCsv(filename: string, rows: Payout[]) {

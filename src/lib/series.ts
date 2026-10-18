@@ -22,3 +22,25 @@ export function decimateSeries(series: SeriesPoint[], maxPoints = 4000): SeriesP
 
   return out
 }
+
+export function sliceByNonce(series: SeriesPoint[], from: number, to: number): SeriesPoint[] {
+  let low = 0
+  let high = series.length
+  while (low < high) {
+    const mid = (low + high) >> 1
+    if (series[mid].nonce < from) low = mid + 1
+    else high = mid
+  }
+  const start = Math.max(0, low - 1)
+
+  low = start
+  high = series.length
+  while (low < high) {
+    const mid = (low + high) >> 1
+    if (series[mid].nonce <= to) low = mid + 1
+    else high = mid
+  }
+  const end = Math.min(series.length, low + 1)
+
+  return series.slice(start, end)
+}

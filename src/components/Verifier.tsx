@@ -4,6 +4,7 @@ import { AlertCircle, Dices, ShieldCheck, X } from 'lucide-react'
 import Results from '@/components/Results'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,7 +12,7 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useSha256 } from '@/hooks/useSha256'
 import { verifyRange } from '@/lib/api'
-import { MAX_BETS } from '@/lib/constants'
+import { MAX_BETS, MAX_BETS_ONLY_MAX } from '@/lib/constants'
 import { fmt } from '@/lib/format'
 import { randomClientSeed, randomServerSeed } from '@/lib/random'
 import type { Game, ReplayRequest, RunResult, Version } from '@/lib/types'
@@ -41,6 +42,8 @@ export default function Verifier({
   const [clientSeed, setClientSeed] = useState('')
   const [first, setFirst] = useState(1)
   const [count, setCount] = useState(100)
+  const [onlyMax, setOnlyMax] = useState(false)
+  const maxBets = onlyMax ? MAX_BETS_ONLY_MAX : MAX_BETS
 
   const [running, setRunning] = useState(false)
   const [percent, setPercent] = useState(0)
@@ -84,6 +87,7 @@ export default function Verifier({
         count,
         (done, total) => setPercent((done / total) * 100),
         controller.signal,
+        { onlyMax },
       )
       setResult(res)
       setRanWith({ serverSeed: serverSeed.trim(), clientSeed: clientSeed.trim(), version, mode })
@@ -191,16 +195,37 @@ export default function Verifier({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="count">Number of bets (max {fmt(MAX_BETS, 0)})</Label>
+              <Label htmlFor="count">Number of bets (max {fmt(maxBets, 0)})</Label>
               <Input
                 id="count"
                 type="number"
                 min={1}
-                max={MAX_BETS}
+                max={maxBets}
                 required
                 value={count}
-                onChange={(e) => setCount(Math.min(MAX_BETS, Math.max(1, Math.floor(Number(e.target.value)))))}
+                onChange={(e) => setCount(Math.min(maxBets, Math.max(1, Math.floor(Number(e.target.value)))))}
               />
+            </div>
+
+            <div className="flex items-start gap-3 rounded-lg border p-3 sm:col-span-2">
+              <Checkbox
+                id="only-max"
+                checked={onlyMax}
+                onCheckedChange={(checked) => {
+                  const enabled = checked === true
+                  setOnlyMax(enabled)
+                  setCount((c) => (enabled ? Math.max(c, 100_000) : Math.min(c, MAX_BETS)))
+                }}
+                className="mt-0.5"
+              />
+              <div className="space-y-1">
+                <Label htmlFor="only-max" className="text-sm text-foreground">
+                  Find only max wins
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Scans up to {fmt(MAX_BETS_ONLY_MAX, 0)} bets and keeps only the nonces that hit the max win of the selected mode. The more bets, the longer it takes.
+                </p>
+              </div>
             </div>
 
             <div className="flex gap-3 sm:col-span-2">

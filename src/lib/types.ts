@@ -23,7 +23,7 @@ export interface Payout {
 }
 
 export interface PeekResponse {
-  game: { modeCost: number; modeRTP: number }
+  game: { modeCost: number; modeRTP: number; modeMax: number }
   payouts: Payout[]
 }
 
@@ -51,6 +51,9 @@ export interface RunResult {
   wins: Payout[]
   best: Payout
   series: SeriesPoint[]
+  markers: SeriesPoint[]
+  onlyMax: boolean
+  maxPayout: number
 }
 
 export interface ReplayRequest {

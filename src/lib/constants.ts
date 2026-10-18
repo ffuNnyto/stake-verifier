@@ -1,7 +1,9 @@
 export const FAIR_API = 'https://fair.stake-engine.com'
 export const MAX_PER_REQUEST = 10_000
 export const MAX_BETS = 50_000
+export const MAX_BETS_ONLY_MAX = 1_000_000
+export const ONLY_MAX_CONCURRENCY = 4
 export const EXCLUDED_PUBLISHERS = new Set(['the-originals'])
-export const IMAGE_PROXY = 'https://wsrv.nl/'
+export const IMAGE_PROXY = ''
 export const FEATURED_PUBLISHERS = ['valkyrie', 'colorful-play']
 export const REPO_URL = 'https://github.com/ffuNnyto/stake-verifier'
