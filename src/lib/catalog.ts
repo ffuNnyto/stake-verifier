@@ -25,10 +25,6 @@ export function sortedVersions(game: Game): Version[] {
   return [...game.versions].sort((a, b) => Number(b.active) - Number(a.active) || b.version - a.version)
 }
 
-export function activeVersion(game: Game): Version {
-  return sortedVersions(game)[0]
-}
-
 export function countPublishers(games: Game[]) {
   return new Set(games.map((game) => game.publisher.slug)).size
 }

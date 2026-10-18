@@ -21,6 +21,7 @@ Check every payout, your RTP and your balance curve, straight from the browser.
 - Results: bets checked, **run RTP vs expected RTP**, hit rate, biggest win and total returned.
 - **Balance chart**: one point per nonce, hover a point to see its payout multiplier and running balance.
 - List of every winning bet, with **CSV export**.
+- **Replay dialog**: click a winning bet (or any point of the balance chart) to watch its official replay, even for a nonce that was never played. The event your seeds land on is found in the browser with the public fair service. Each game shows a badge: **Replays available** or **Replays not yet**. Replays only exist for the games whose game id is included in `src/lib/knownReplays.json` (partial coverage).
 - SHA-256 of your server seed, to compare with the hash Stake showed before you bet.
 - **Random seeds** button to simulate a run.
 - Shareable links per game: `?game=<publisher>/<slug>&version=<n>&mode=<name>`.
@@ -53,6 +54,8 @@ This app does not download those tables. It asks the public fair service of Stak
 | --- | --- |
 | `GET https://fair.stake-engine.com/catalogue` | Games, math versions and modes, loaded when the page opens |
 | `POST https://fair.stake-engine.com/peek` | Payout of each nonce for the given seeds (`nonceEnd` is exclusive, about 10,000 nonces per request) |
+| `POST https://fair.stake-engine.com/outcome/{team}/{game}/{version}/{mode}` | The roll and payout of a nonce |
+| `GET https://fair.stake-engine.com/event/{team}/{game}/{version}/{mode}?from=&to=` | Weight range of events, searched to find the event a roll lands on |
 
 Both endpoints allow cross-origin requests, so the app runs entirely in the browser and can be hosted as static files.
 
@@ -86,6 +89,10 @@ npm run lint
 ```
 
 Settings you may want to change are in `src/lib/constants.ts`: the featured publishers, the excluded publishers and the request limits.
+
+## Replay data
+
+The replay game ids live in `src/lib/knownReplays.json` (`team/game` to front-end URL and game id). Engine does not publish them, so the list is partial and grows as ids are collected.
 
 ## Notes
 

@@ -30,9 +30,10 @@ function PointTooltip({ active, payload }: TooltipContentProps) {
 
 interface Props {
   series: SeriesPoint[]
+  onPickNonce?: (nonce: number) => void
 }
 
-export default function ProfitChart({ series }: Props) {
+export default function ProfitChart({ series, onPickNonce }: Props) {
   const data = useMemo(() => decimateSeries(series), [series])
   const sampled = data.length < series.length
 
@@ -42,13 +43,20 @@ export default function ProfitChart({ series }: Props) {
         <CardTitle>Balance over time</CardTitle>
         <CardDescription>
           {sampled
-            ? `Showing ${fmt(data.length, 0)} of ${fmt(series.length, 0)} nonces: the highest and lowest balance of each interval. Hover a point to see its payout.`
-            : 'One point per nonce. Hover a point to see its payout multiplier and your running balance.'}
+            ? `Showing ${fmt(data.length, 0)} of ${fmt(series.length, 0)} nonces: the highest and lowest balance of each interval. Hover a point to see its payout${onPickNonce ? ', click it to watch the replay' : ''}.`
+            : `One point per nonce. Hover a point to see its payout and your running balance${onPickNonce ? ', click it to watch the replay' : ''}.`}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={config} className="h-96 w-full">
-          <AreaChart data={data} margin={{ left: 4, right: 12, top: 8 }}>
+        <ChartContainer config={config} className={cn('h-96 w-full', onPickNonce && 'cursor-pointer')}>
+          <AreaChart
+            data={data}
+            margin={{ left: 4, right: 12, top: 8 }}
+            onClick={(state) => {
+              const point = data[Number(state?.activeIndex)]
+              if (point && onPickNonce) onPickNonce(point.nonce)
+            }}
+          >
             <defs>
               <linearGradient id="profitFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="var(--color-profit)" stopOpacity={0.35} />

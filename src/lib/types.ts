@@ -53,6 +53,14 @@ export interface RunResult {
   series: SeriesPoint[]
 }
 
+export interface ReplayRequest {
+  nonce: number
+  serverSeed: string
+  clientSeed: string
+  version: number
+  mode: string
+}
+
 export interface RouteState {
   game: string | null
   version?: number

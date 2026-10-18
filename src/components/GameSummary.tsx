@@ -1,3 +1,4 @@
+import { Play } from 'lucide-react'
 import GameImage from '@/components/GameImage'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,10 +10,11 @@ interface Props {
   game: Game
   version: Version
   mode: string
+  replayAvailable: boolean
   onModeChange: (mode: string) => void
 }
 
-export default function GameSummary({ game, version, mode, onModeChange }: Props) {
+export default function GameSummary({ game, version, mode, replayAvailable, onModeChange }: Props) {
   return (
     <Card className="overflow-hidden py-0">
       <GameImage src={game.game.image} name={game.game.name} width={480} className="aspect-[3/4] w-full" />
@@ -26,6 +28,16 @@ export default function GameSummary({ game, version, mode, onModeChange }: Props
           {version.active && <Badge variant="secondary">Active</Badge>}
           <Badge variant="outline">{version.modes.length} modes</Badge>
         </div>
+        {replayAvailable ? (
+          <Badge className="gap-1.5">
+            <Play className="size-3" />
+            Replays available
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="text-muted-foreground">
+            Replays not yet
+          </Badge>
+        )}
         <div className="space-y-1">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Modes · RTP</div>
           {version.modes.map((m) => (

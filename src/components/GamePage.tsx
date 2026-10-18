@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import GameSummary from '@/components/GameSummary'
+import ReplayDialog from '@/components/ReplayDialog'
 import Verifier from '@/components/Verifier'
 import { Button } from '@/components/ui/button'
-import { sortedVersions } from '@/lib/catalog'
-import type { Game } from '@/lib/types'
+import { gameKey, sortedVersions } from '@/lib/catalog'
+import { hasReplay } from '@/lib/replay'
+import type { Game, ReplayRequest } from '@/lib/types'
 
 interface Props {
   game: Game
@@ -23,6 +25,8 @@ export default function GamePage({ game, initialVersion, initialMode, onBack, on
   const [mode, setMode] = useState(() =>
     version.modes.some((m) => m.name === initialMode) ? (initialMode as string) : version.modes[0].name,
   )
+  const [replay, setReplay] = useState<ReplayRequest | null>(null)
+  const replayAvailable = hasReplay(gameKey(game))
 
   useEffect(() => {
     onSelectionChange(version.version, mode)
@@ -42,7 +46,7 @@ export default function GamePage({ game, initialVersion, initialMode, onBack, on
       </Button>
       <div className="grid gap-6 lg:grid-cols-[340px_1fr] xl:gap-8">
         <div className="lg:sticky lg:top-20 lg:self-start">
-          <GameSummary game={game} version={version} mode={mode} onModeChange={setMode} />
+          <GameSummary game={game} version={version} mode={mode} replayAvailable={replayAvailable} onModeChange={setMode} />
         </div>
         <Verifier
           game={game}
@@ -51,8 +55,10 @@ export default function GamePage({ game, initialVersion, initialMode, onBack, on
           mode={mode}
           onVersionChange={changeVersion}
           onModeChange={setMode}
+          onReplay={replayAvailable ? setReplay : undefined}
         />
       </div>
+      <ReplayDialog game={game} request={replay} onClose={() => setReplay(null)} />
     </div>
   )
 }

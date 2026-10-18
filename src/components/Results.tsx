@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Download, Percent, Receipt, Target, Trophy } from 'lucide-react'
+import { Download, Percent, Play, Receipt, Target, Trophy } from 'lucide-react'
 import StatCard from '@/components/StatCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,9 +15,10 @@ const MAX_ROWS = 300
 interface Props {
   result: RunResult
   filename: string
+  onReplay?: (nonce: number) => void
 }
 
-export default function Results({ result, filename }: Props) {
+export default function Results({ result, filename, onReplay }: Props) {
   const { bets, wins, best, runRtp, expectedRtp, totalReturned, cost } = result
   const hasExpected = Number.isFinite(expectedRtp)
   const delta = hasExpected ? (runRtp - expectedRtp) * 100 : 0
@@ -43,16 +44,24 @@ export default function Results({ result, filename }: Props) {
       </div>
 
       <Suspense fallback={<Skeleton className="h-96 rounded-xl" />}>
-        <ProfitChart series={result.series} />
+        <ProfitChart series={result.series} onPickNonce={onReplay} />
       </Suspense>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle>Winning bets</CardTitle>
-          <Button variant="secondary" size="sm" onClick={() => downloadCsv(filename, wins)} disabled={wins.length === 0}>
-            <Download className="size-4" />
-            CSV
-          </Button>
+          <div className="flex gap-2">
+            {onReplay && best.value > 0 && (
+              <Button variant="secondary" size="sm" onClick={() => onReplay(best.nonce)}>
+                <Play className="size-4" />
+                Replay biggest win
+              </Button>
+            )}
+            <Button variant="secondary" size="sm" onClick={() => downloadCsv(filename, wins)} disabled={wins.length === 0}>
+              <Download className="size-4" />
+              CSV
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {wins.length === 0 ? (
@@ -64,6 +73,7 @@ export default function Results({ result, filename }: Props) {
                   <TableRow>
                     <TableHead>Nonce</TableHead>
                     <TableHead className="text-right">Payout</TableHead>
+                    {onReplay && <TableHead className="w-20 text-right">Replay</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -71,6 +81,19 @@ export default function Results({ result, filename }: Props) {
                     <TableRow key={win.nonce}>
                       <TableCell className="tabular-nums">{win.nonce}</TableCell>
                       <TableCell className="text-right font-medium tabular-nums">{fmt(win.value)}x</TableCell>
+                      {onReplay && (
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7"
+                            onClick={() => onReplay(win.nonce)}
+                            aria-label={`Replay nonce ${win.nonce}`}
+                          >
+                            <Play className="size-4" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>

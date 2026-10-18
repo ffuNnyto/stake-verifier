@@ -14,7 +14,7 @@ import { verifyRange } from '@/lib/api'
 import { MAX_BETS } from '@/lib/constants'
 import { fmt } from '@/lib/format'
 import { randomClientSeed, randomServerSeed } from '@/lib/random'
-import type { Game, RunResult, Version } from '@/lib/types'
+import type { Game, ReplayRequest, RunResult, Version } from '@/lib/types'
 
 interface Props {
   game: Game
@@ -23,9 +23,18 @@ interface Props {
   mode: string
   onVersionChange: (version: number) => void
   onModeChange: (mode: string) => void
+  onReplay?: (request: ReplayRequest) => void
 }
 
-export default function Verifier({ game, versions, version, mode, onVersionChange, onModeChange }: Props) {
+export default function Verifier({
+  game,
+  versions,
+  version,
+  mode,
+  onVersionChange,
+  onModeChange,
+  onReplay,
+}: Props) {
   const modes = versions.find((v) => v.version === version)?.modes ?? []
 
   const [serverSeed, setServerSeed] = useState('')
@@ -37,6 +46,7 @@ export default function Verifier({ game, versions, version, mode, onVersionChang
   const [percent, setPercent] = useState(0)
   const [error, setError] = useState('')
   const [result, setResult] = useState<RunResult | null>(null)
+  const [ranWith, setRanWith] = useState<Omit<ReplayRequest, 'nonce'> | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
   const [simulated, setSimulated] = useState(false)
@@ -76,6 +86,7 @@ export default function Verifier({ game, versions, version, mode, onVersionChang
         controller.signal,
       )
       setResult(res)
+      setRanWith({ serverSeed: serverSeed.trim(), clientSeed: clientSeed.trim(), version, mode })
     } catch (err) {
       if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
@@ -216,7 +227,7 @@ export default function Verifier({ game, versions, version, mode, onVersionChang
         </CardContent>
       </Card>
 
-      {result && <Results result={result} filename={`${game.game.slug}-${mode}-wins.csv`} />}
+      {result && <Results result={result} filename={`${game.game.slug}-${mode}-wins.csv`} onReplay={onReplay && ((nonce) => ranWith && onReplay({ nonce, ...ranWith }))} />}
     </div>
   )
 }
