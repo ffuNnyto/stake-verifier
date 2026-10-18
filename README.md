@@ -59,7 +59,7 @@ This app does not download those tables. It asks the public fair service of Stak
 
 Both endpoints allow cross-origin requests, so the app runs entirely in the browser and can be hosted as static files.
 
-Privacy: your seeds are only sent to `fair.stake-engine.com`, in the request body. They are never put in the URL and never stored. Game thumbnails go through the free [wsrv.nl](https://wsrv.nl) resizer and fall back to the original image.
+Privacy: your seeds are only sent to `fair.stake-engine.com`, in the request body. They are never put in the URL and never stored. Visits are counted with [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/), which uses no cookies and never sees your seeds.
 
 ## Tech stack
 
